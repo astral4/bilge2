@@ -26,7 +26,10 @@ impl DiscriminantAssigner {
         let discriminant_expr = &discriminant.1;
         let variant_name = &variant.ident;
 
-        let Expr::Lit(ExprLit { lit: Lit::Int(int), .. }) = discriminant_expr else {
+        let Expr::Lit(ExprLit {
+            lit: Lit::Int(int), ..
+        }) = discriminant_expr
+        else {
             abort!(
                 discriminant_expr,
                 "variant `{}` is not a number", variant_name;
@@ -43,7 +46,9 @@ impl DiscriminantAssigner {
     }
 
     fn assign(&mut self, variant: &Variant) -> u128 {
-        let value = self.value_from_discriminant(variant).unwrap_or(self.next_expected_assignment);
+        let value = self
+            .value_from_discriminant(variant)
+            .unwrap_or(self.next_expected_assignment);
         self.next_expected_assignment = value + 1;
         value
     }

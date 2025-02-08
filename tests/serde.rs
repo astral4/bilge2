@@ -21,7 +21,10 @@ fn serde_struct() {
     assert_tokens(
         &bits,
         &[
-            Token::Struct { name: "BitsStruct", len: 2 },
+            Token::Struct {
+                name: "BitsStruct",
+                len: 2,
+            },
             Token::Str("field1"),
             Token::U8(0b00100011),
             Token::Str("field2"),
@@ -35,7 +38,10 @@ fn serde_struct() {
 fn serde_struct_missing_field() {
     assert_de_tokens_error::<BitsStruct>(
         &[
-            Token::Struct { name: "BitsStruct", len: 1 },
+            Token::Struct {
+                name: "BitsStruct",
+                len: 1,
+            },
             Token::Str("field1"),
             Token::U8(0b00100011),
             Token::StructEnd,
@@ -48,7 +54,10 @@ fn serde_struct_missing_field() {
 fn serde_struct_extra_field() {
     assert_de_tokens_error::<BitsStruct>(
         &[
-            Token::Struct { name: "BitsStruct", len: 3 },
+            Token::Struct {
+                name: "BitsStruct",
+                len: 3,
+            },
             Token::Str("field1"),
             Token::U8(0b00100011),
             Token::Str("field2"),
@@ -85,7 +94,10 @@ fn serde_tuple_struct() {
 fn serde_tuple_struct_map() {
     assert_de_tokens_error::<BitsTupleStruct>(
         &[
-            Token::TupleStruct { name: "BitsStruct", len: 3 },
+            Token::TupleStruct {
+                name: "BitsStruct",
+                len: 3,
+            },
             Token::Str("val_0"),
         ],
         r#"invalid type: string "val_0", expected u8"#,

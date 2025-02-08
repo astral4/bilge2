@@ -21,13 +21,21 @@ pub(super) fn bitsize_internal(args: TokenStream, item: TokenStream) -> TokenStr
             let expanded = generate_struct(item, &arb_int);
             let attrs = &item.attrs;
             let name = &item.ident;
-            ItemIr { attrs, name, expanded }
+            ItemIr {
+                attrs,
+                name,
+                expanded,
+            }
         }
         Item::Enum(ref item) => {
             let expanded = generate_enum(item);
             let attrs = &item.attrs;
             let name = &item.ident;
-            ItemIr { attrs, name, expanded }
+            ItemIr {
+                attrs,
+                name,
+                expanded,
+            }
         }
         _ => unreachable(()),
     };
@@ -41,11 +49,16 @@ fn parse(item: TokenStream, args: TokenStream) -> (Item, TokenStream) {
 }
 
 fn generate_struct(struct_data: &ItemStruct, arb_int: &TokenStream) -> TokenStream {
-    let ItemStruct { vis, ident, fields, .. } = struct_data;
+    let ItemStruct {
+        vis, ident, fields, ..
+    } = struct_data;
 
     let mut fieldless_next_int = 0;
     let mut previous_field_sizes = vec![];
-    let (accessors, (constructor_args, constructor_parts)): (Vec<TokenStream>, (Vec<TokenStream>, Vec<TokenStream>)) = fields
+    let (accessors, (constructor_args, constructor_parts)): (
+        Vec<TokenStream>,
+        (Vec<TokenStream>, Vec<TokenStream>),
+    ) = fields
         .iter()
         .map(|field| {
             // offset is needed for bit-shifting
@@ -64,7 +77,11 @@ fn generate_struct(struct_data: &ItemStruct, arb_int: &TokenStream) -> TokenStre
         })
         .unzip();
 
-    let const_ = if cfg!(feature = "nightly") { quote!(const) } else { quote!() };
+    let const_ = if cfg!(feature = "nightly") {
+        quote!(const)
+    } else {
+        quote!()
+    };
 
     quote! {
         #vis struct #ident {
@@ -88,7 +105,11 @@ fn generate_struct(struct_data: &ItemStruct, arb_int: &TokenStream) -> TokenStre
     }
 }
 
-fn generate_field(field: &Field, field_offset: &TokenStream, fieldless_next_int: &mut usize) -> (TokenStream, (TokenStream, TokenStream)) {
+fn generate_field(
+    field: &Field,
+    field_offset: &TokenStream,
+    fieldless_next_int: &mut usize,
+) -> (TokenStream, (TokenStream, TokenStream)) {
     let Field { ident, ty, .. } = field;
     let name = if let Some(ident) = ident {
         ident.clone()
@@ -131,7 +152,11 @@ fn generate_getter(field: &Field, offset: &TokenStream, name: &Ident) -> TokenSt
 
     let getter_value = struct_gen::generate_getter_value(ty, offset, false);
 
-    let const_ = if cfg!(feature = "nightly") { quote!(const) } else { quote!() };
+    let const_ = if cfg!(feature = "nightly") {
+        quote!(const)
+    } else {
+        quote!()
+    };
 
     let array_at = if let Type::Array(array) = ty {
         let elem_ty = &array.elem;
@@ -169,7 +194,11 @@ fn generate_setter(field: &Field, offset: &TokenStream, name: &Ident) -> TokenSt
 
     let name: Ident = syn::parse_str(&format!("set_{name}")).unwrap_or_else(unreachable);
 
-    let const_ = if cfg!(feature = "nightly") { quote!(const) } else { quote!() };
+    let const_ = if cfg!(feature = "nightly") {
+        quote!(const)
+    } else {
+        quote!()
+    };
 
     let array_at = if let Type::Array(array) = ty {
         let elem_ty = &array.elem;
@@ -210,7 +239,12 @@ fn generate_constructor_stuff(ty: &Type, name: &Ident) -> (TokenStream, TokenStr
 }
 
 fn generate_enum(enum_data: &ItemEnum) -> TokenStream {
-    let ItemEnum { vis, ident, variants, .. } = enum_data;
+    let ItemEnum {
+        vis,
+        ident,
+        variants,
+        ..
+    } = enum_data;
     quote! {
         #vis enum #ident {
             #variants
@@ -221,7 +255,11 @@ fn generate_enum(enum_data: &ItemEnum) -> TokenStream {
 /// We have _one_ `generate_common` function, which holds everything struct and enum have _in common_.
 /// Everything else has its own `generate_` functions.
 fn generate_common(ir: ItemIr, arb_int: &TokenStream) -> TokenStream {
-    let ItemIr { attrs, name, expanded } = ir;
+    let ItemIr {
+        attrs,
+        name,
+        expanded,
+    } = ir;
 
     quote! {
         #(#attrs)*

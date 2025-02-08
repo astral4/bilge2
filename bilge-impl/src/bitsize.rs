@@ -6,7 +6,9 @@ use quote::quote;
 use split::SplitAttributes;
 use syn::{punctuated::Iter, spanned::Spanned, Fields, Item, ItemEnum, ItemStruct, Type, Variant};
 
-use crate::shared::{self, enum_fills_bitsize, is_fallback_attribute, unreachable, BitSize, MAX_ENUM_BIT_SIZE};
+use crate::shared::{
+    self, enum_fills_bitsize, is_fallback_attribute, unreachable, BitSize, MAX_ENUM_BIT_SIZE,
+};
 
 /// Intermediate Representation, just for bundling these together
 struct ItemIr {
@@ -112,7 +114,9 @@ fn analyze_enum(bitsize: BitSize, variants: Iter<Variant>) {
         abort_call_site!("empty enums are not supported");
     }
 
-    let has_fallback = variants.flat_map(|variant| &variant.attrs).any(is_fallback_attribute);
+    let has_fallback = variants
+        .flat_map(|variant| &variant.attrs)
+        .any(is_fallback_attribute);
 
     if !has_fallback {
         // this has a side-effect of validating the enum count
@@ -121,7 +125,9 @@ fn analyze_enum(bitsize: BitSize, variants: Iter<Variant>) {
 }
 
 fn generate_struct(item: &ItemStruct, declared_bitsize: u8) -> TokenStream {
-    let ItemStruct { vis, ident, fields, .. } = item;
+    let ItemStruct {
+        vis, ident, fields, ..
+    } = item;
     let declared_bitsize = declared_bitsize as usize;
 
     let computed_bitsize = fields.iter().fold(quote!(0), |acc, next| {
@@ -159,7 +165,12 @@ fn generate_struct(item: &ItemStruct, declared_bitsize: u8) -> TokenStream {
 
 // attributes are handled in `generate_common`
 fn generate_enum(item: &ItemEnum) -> TokenStream {
-    let ItemEnum { vis, ident, variants, .. } = item;
+    let ItemEnum {
+        vis,
+        ident,
+        variants,
+        ..
+    } = item;
     quote! {
         #vis enum #ident {
             #variants

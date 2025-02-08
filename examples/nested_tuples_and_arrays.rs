@@ -1,9 +1,19 @@
-#![cfg_attr(feature = "nightly", feature(const_convert, const_trait_impl, const_mut_refs, const_maybe_uninit_write))]
+#![cfg_attr(
+    feature = "nightly",
+    feature(
+        const_convert,
+        const_trait_impl,
+        const_mut_refs,
+        const_maybe_uninit_write
+    )
+)]
 #![allow(clippy::unusual_byte_groupings)]
 // you can use the "Expand glob import" command on
 // use bilge::prelude::*;
 // but still need to add Bitsized, Number yourself
-use bilge::prelude::{bitsize, u1, u18, u2, u39, Bitsized, DebugBits, DefaultBits, FromBits, Number, TryFromBits};
+use bilge::prelude::{
+    bitsize, u1, u18, u2, u39, Bitsized, DebugBits, DefaultBits, FromBits, Number, TryFromBits,
+};
 
 // This file basically just informs you that yes, combinations of different nestings work.
 // also see `tests/struct.rs`
@@ -41,8 +51,14 @@ struct InnerTupleStruct(u1, bool);
 fn main() {
     let field1 = (u1::new(0), (u2::new(0b00), 0b1111_1111), u1::new(1));
     let array = [
-        [InnerTupleStruct::from(u2::new(3)), InnerTupleStruct::from(u2::new(0b10))],
-        [InnerTupleStruct::from(u2::new(3)), InnerTupleStruct::from(u2::new(0))],
+        [
+            InnerTupleStruct::from(u2::new(3)),
+            InnerTupleStruct::from(u2::new(0b10)),
+        ],
+        [
+            InnerTupleStruct::from(u2::new(3)),
+            InnerTupleStruct::from(u2::new(0)),
+        ],
     ];
     let big_fumble = [[
         (
@@ -61,7 +77,9 @@ fn main() {
         ),
     ]];
     let mut mess = Mess::new(field1, array, u1::new(1), big_fumble);
-    let mess2 = Mess::from(u39::new(0b0_1_1111_110_0_1_1111_111__1_0011_1011__1__111_1111_1000));
+    let mess2 = Mess::from(u39::new(
+        0b0_1_1111_110_0_1_1111_111__1_0011_1011__1__111_1111_1000,
+    ));
     // dbg!(&mess);
     assert_eq!(mess, mess2);
     assert_eq!(field1, mess.field1());
@@ -71,8 +89,14 @@ fn main() {
     let field1 = (u1::new(0), (u2::new(0b10), 0b1010_0100), u1::new(0));
     mess.set_field1(field1);
 
-    let elem_0 = [InnerTupleStruct::from(u2::new(0)), InnerTupleStruct::from(u2::new(0b01))];
-    let elem_1 = [InnerTupleStruct::from(u2::new(0)), InnerTupleStruct::from(u2::new(3))];
+    let elem_0 = [
+        InnerTupleStruct::from(u2::new(0)),
+        InnerTupleStruct::from(u2::new(0b01)),
+    ];
+    let elem_1 = [
+        InnerTupleStruct::from(u2::new(0)),
+        InnerTupleStruct::from(u2::new(3)),
+    ];
     let array = [elem_0, elem_1];
     mess.set_array(array);
 
@@ -104,8 +128,14 @@ fn main() {
 
     let uem1 = UnfilledEnumMess::try_from(u18::new(0b1_0101_1110_0_1010_1010)).unwrap();
     let uem2 = UnfilledEnumMess::new([[
-        ([[(HaveFun::Maybe, u2::new(2)), (HaveFun::Maybe, u2::new(2))]], u1::new(0)),
-        ([[(HaveFun::Maybe, u2::new(3)), (HaveFun::Yes, u2::new(1))]], u1::new(1)),
+        (
+            [[(HaveFun::Maybe, u2::new(2)), (HaveFun::Maybe, u2::new(2))]],
+            u1::new(0),
+        ),
+        (
+            [[(HaveFun::Maybe, u2::new(3)), (HaveFun::Yes, u2::new(1))]],
+            u1::new(1),
+        ),
     ]]);
     assert_eq!(uem1.value, uem2.value);
     assert_eq!(uem1, uem2);

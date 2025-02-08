@@ -23,7 +23,10 @@ pub(crate) fn parse_derive(item: TokenStream) -> DeriveInput {
 
 // allow since we want `if try_from` blocks to stand out
 #[allow(clippy::collapsible_if)]
-pub(crate) fn analyze_derive(derive_input: &DeriveInput, try_from: bool) -> (&syn::Data, TokenStream, &Ident, BitSize, Option<Fallback>) {
+pub(crate) fn analyze_derive(
+    derive_input: &DeriveInput,
+    try_from: bool,
+) -> (&syn::Data, TokenStream, &Ident, BitSize, Option<Fallback>) {
     let DeriveInput {
         attrs,
         ident,
@@ -49,7 +52,9 @@ pub(crate) fn analyze_derive(derive_input: &DeriveInput, try_from: bool) -> (&sy
     let args = attrs
         .iter()
         .find_map(bitsize_internal_arg)
-        .unwrap_or_else(|| abort_call_site!("add #[bitsize] attribute above your derive attribute"));
+        .unwrap_or_else(|| {
+            abort_call_site!("add #[bitsize] attribute above your derive attribute")
+        });
     let (bitsize, arb_int) = bitsize_and_arbitrary_int_from(args);
 
     let fallback = fallback_variant(data, bitsize);
@@ -99,7 +104,10 @@ pub fn generate_type_bitsize(ty: &Type) -> TokenStream {
 }
 
 pub(crate) fn generate_from_enum_impl(
-    arb_int: &TokenStream, enum_type: &Ident, to_int_match_arms: Vec<TokenStream>, const_: &TokenStream,
+    arb_int: &TokenStream,
+    enum_type: &Ident,
+    to_int_match_arms: Vec<TokenStream>,
+    const_: &TokenStream,
 ) -> TokenStream {
     quote! {
         impl #const_ ::core::convert::From<#enum_type> for #arb_int {
@@ -117,7 +125,9 @@ pub(crate) fn generate_from_enum_impl(
 ///
 /// Currently, this is exactly the set of types we can extract a bitsize out of, just by looking at their ident: `uN` and `bool`.
 pub fn is_always_filled(ty: &Type) -> bool {
-    last_ident_of_path(ty).and_then(bitsize_from_type_ident).is_some()
+    last_ident_of_path(ty)
+        .and_then(bitsize_from_type_ident)
+        .is_some()
 }
 
 pub fn last_ident_of_path(ty: &Type) -> Option<&Ident> {
@@ -180,7 +190,12 @@ pub fn bitsize_from_type_ident(type_name: &Ident) -> Option<BitSize> {
     }
 }
 
-pub fn to_int_match_arm(enum_name: &Ident, variant_name: &Ident, arb_int: &TokenStream, variant_value: Literal) -> TokenStream {
+pub fn to_int_match_arm(
+    enum_name: &Ident,
+    variant_name: &Ident,
+    arb_int: &TokenStream,
+    variant_value: Literal,
+) -> TokenStream {
     quote! { #enum_name::#variant_name => #arb_int::new(#variant_value), }
 }
 

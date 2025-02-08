@@ -3,7 +3,9 @@ use proc_macro2::Ident;
 use proc_macro_error::{abort, abort_call_site};
 use syn::{Data, Variant};
 
-use super::{bitsize_from_type_ident, is_fallback_attribute, last_ident_of_path, unreachable, BitSize};
+use super::{
+    bitsize_from_type_ident, is_fallback_attribute, last_ident_of_path, unreachable, BitSize,
+};
 
 pub enum Fallback {
     Unit(Ident),
@@ -31,7 +33,8 @@ impl Fallback {
                 }
 
                 // here we validate that the fallback variant field type matches the bitsize
-                let size_from_type = last_ident_of_path(&fallback_value.ty).and_then(bitsize_from_type_ident);
+                let size_from_type =
+                    last_ident_of_path(&fallback_value.ty).and_then(bitsize_from_type_ident);
 
                 match size_from_type {
                     Some(bitsize) if bitsize == enum_bitsize => Fallback::WithValue(ident),
@@ -41,7 +44,10 @@ impl Fallback {
                         bitsize,
                         enum_bitsize
                     ),
-                    None => abort!(variant.fields, "`#[fallback]` only supports arbitrary_int or bool types"),
+                    None => abort!(
+                        variant.fields,
+                        "`#[fallback]` only supports arbitrary_int or bool types"
+                    ),
                 }
             }
             Unit => Fallback::Unit(ident),

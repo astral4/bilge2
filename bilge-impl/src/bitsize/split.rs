@@ -55,7 +55,9 @@ impl SplitAttributes {
         let attrs = match item {
             Item::Enum(item) => &item.attrs,
             Item::Struct(item) => &item.attrs,
-            _ => abort_call_site!("item is not a struct or enum"; help = "`#[bitsize]` can only be used on structs and enums"),
+            _ => {
+                abort_call_site!("item is not a struct or enum"; help = "`#[bitsize]` can only be used on structs and enums")
+            }
         };
 
         let parsed = attrs.iter().map(parse_attribute);
@@ -106,7 +108,10 @@ impl SplitAttributes {
 
         if let Some(from_bytes) = from_bytes {
             if !has_frombits {
-                abort!(from_bytes.0, "a bitfield with zerocopy::FromBytes also needs to have FromBits")
+                abort!(
+                    from_bytes.0,
+                    "a bitfield with zerocopy::FromBytes also needs to have FromBits"
+                )
             }
         }
 
@@ -139,7 +144,9 @@ fn parse_attribute(attribute: &Attribute) -> ParsedAttribute {
             ParsedAttribute::DeriveList(derives)
         }
 
-        meta if contains_anywhere(meta, "bitsize_internal") => ParsedAttribute::BitsizeInternal(attribute),
+        meta if contains_anywhere(meta, "bitsize_internal") => {
+            ParsedAttribute::BitsizeInternal(attribute)
+        }
 
         _ => ParsedAttribute::Other(attribute),
     }

@@ -1,4 +1,12 @@
-#![cfg_attr(feature = "nightly", feature(const_convert, const_trait_impl, const_mut_refs, const_maybe_uninit_write))]
+#![cfg_attr(
+    feature = "nightly",
+    feature(
+        const_convert,
+        const_trait_impl,
+        const_mut_refs,
+        const_maybe_uninit_write
+    )
+)]
 #![allow(clippy::unusual_byte_groupings)]
 use bilge::prelude::*;
 
@@ -110,7 +118,10 @@ struct Nested {
 #[test]
 fn nested_fields() {
     let a = NestedField::from(u35::new(0b111_1111_1111_1111_1111_0111_1111_1111_1111));
-    assert_eq!(a.nested(), Nested::from(0b___1111_1111_1111_1111_0111_1111_1111_1111));
+    assert_eq!(
+        a.nested(),
+        Nested::from(0b___1111_1111_1111_1111_0111_1111_1111_1111)
+    );
     assert_eq!(a.field2(), u1::new(0b1));
     assert_eq!(a.field3(), u2::new(0b11));
 
@@ -124,15 +135,25 @@ fn nested_fields() {
     let mut nested = a.nested();
     nested.set_field2(0);
     a.set_nested(nested);
-    assert_eq!(a.nested(), Nested::from(0b___1111_1111_1111_1111_1111_1100_0000_0011));
+    assert_eq!(
+        a.nested(),
+        Nested::from(0b___1111_1111_1111_1111_1111_1100_0000_0011)
+    );
 
     // Constructors don't do anything different
     let a = NestedField::new(
-        Nested::new(u2::new(0b11), 0b1111_1111, u22::new(0b11_0000_1111_0000_1111_1111)),
+        Nested::new(
+            u2::new(0b11),
+            0b1111_1111,
+            u22::new(0b11_0000_1111_0000_1111_1111),
+        ),
         u1::new(0b1),
         u2::new(0b11),
     );
-    assert_eq!(a.nested(), Nested::from(0b___1100_0011_1100_0011_1111_1111_1111_1111));
+    assert_eq!(
+        a.nested(),
+        Nested::from(0b___1100_0011_1100_0011_1111_1111_1111_1111)
+    );
     assert_eq!(a.field2(), u1::new(0b1));
     assert_eq!(a.field3(), u2::new(0b11));
 }
@@ -175,12 +196,17 @@ struct MemoryMappedRegisters {
 
 #[test]
 fn reserved_fields() {
-    let mapped = MemoryMappedRegisters::from(0b0000000000000000_001111110000_0000_1000000010001000_11_00000000000000);
+    let mapped = MemoryMappedRegisters::from(
+        0b0000000000000000_001111110000_0000_1000000010001000_11_00000000000000,
+    );
     let status = u2::new(0b11);
     let register1 = u16::new(0b1000000010001000);
     let register2 = u12::new(0b001111110000);
     // Reserved fields are skipped in constructors and set to zero automatically
-    assert_eq!(mapped, MemoryMappedRegisters::new(status, register1, register2));
+    assert_eq!(
+        mapped,
+        MemoryMappedRegisters::new(status, register1, register2)
+    );
     assert_eq!(mapped.status(), status);
     assert_eq!(mapped.register1(), register1);
     assert_eq!(mapped.register2(), register2);
@@ -319,8 +345,14 @@ enum HaveFun {
 fn that_one_test() {
     let tu_tuple_ple = (u1::new(0), (u2::new(0b00), 0b1111_1111), u1::new(1));
     let arr_arr_ay_ay = [
-        [InnerTupleStruct::from(u2::new(3)), InnerTupleStruct::from(u2::new(0b10))],
-        [InnerTupleStruct::from(u2::new(3)), InnerTupleStruct::from(u2::new(0))],
+        [
+            InnerTupleStruct::from(u2::new(3)),
+            InnerTupleStruct::from(u2::new(0b10)),
+        ],
+        [
+            InnerTupleStruct::from(u2::new(3)),
+            InnerTupleStruct::from(u2::new(0)),
+        ],
     ];
     let bit = u1::new(1);
     let arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay = [[
@@ -339,32 +371,54 @@ fn that_one_test() {
             u1::new(0),
         ),
     ]];
-    let mut mess = NestedMess::new(tu_tuple_ple, arr_arr_ay_ay, bit, arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay);
+    let mut mess = NestedMess::new(
+        tu_tuple_ple,
+        arr_arr_ay_ay,
+        bit,
+        arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay,
+    );
     // dbg!(&mess);
     assert_eq!(
         mess,
-        NestedMess::from(u39::new(0b0_1_1111_110_0_1_1111_111__1_0011_1011__1__111_1111_1000))
+        NestedMess::from(u39::new(
+            0b0_1_1111_110_0_1_1111_111__1_0011_1011__1__111_1111_1000
+        ))
     );
     assert_eq!(tu_tuple_ple, mess.tu_tuple_ple());
     assert_eq!(arr_arr_ay_ay, mess.arr_arr_ay_ay());
     assert_eq!(bit, mess.bit());
-    assert_eq!(arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay, mess.arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay());
+    assert_eq!(
+        arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay,
+        mess.arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay()
+    );
 
     let tu_tuple_ple = (u1::new(0), (u2::new(0b10), 0b1010_0100), u1::new(0));
     mess.set_tu_tuple_ple(tu_tuple_ple);
     assert_eq!(tu_tuple_ple, mess.tu_tuple_ple());
     assert_eq!(arr_arr_ay_ay, mess.arr_arr_ay_ay());
     assert_eq!(bit, mess.bit());
-    assert_eq!(arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay, mess.arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay());
+    assert_eq!(
+        arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay,
+        mess.arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay()
+    );
 
-    let elem_0 = [InnerTupleStruct::from(u2::new(0)), InnerTupleStruct::from(u2::new(0b01))];
-    let elem_1 = [InnerTupleStruct::from(u2::new(0)), InnerTupleStruct::from(u2::new(3))];
+    let elem_0 = [
+        InnerTupleStruct::from(u2::new(0)),
+        InnerTupleStruct::from(u2::new(0b01)),
+    ];
+    let elem_1 = [
+        InnerTupleStruct::from(u2::new(0)),
+        InnerTupleStruct::from(u2::new(3)),
+    ];
     let arr_arr_ay_ay = [elem_0, elem_1];
     mess.set_arr_arr_ay_ay(arr_arr_ay_ay);
     assert_eq!(tu_tuple_ple, mess.tu_tuple_ple());
     assert_eq!(arr_arr_ay_ay, mess.arr_arr_ay_ay());
     assert_eq!(bit, mess.bit());
-    assert_eq!(arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay, mess.arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay());
+    assert_eq!(
+        arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay,
+        mess.arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay()
+    );
 
     let arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay = [[
         (
@@ -386,13 +440,22 @@ fn that_one_test() {
     assert_eq!(tu_tuple_ple, mess.tu_tuple_ple());
     assert_eq!(arr_arr_ay_ay, mess.arr_arr_ay_ay());
     assert_eq!(bit, mess.bit());
-    assert_eq!(arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay, mess.arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay());
+    assert_eq!(
+        arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay,
+        mess.arr_arr_tu_arr_arr_tuple_ay_ay_ple_ay_ay()
+    );
     // dbg!(&mess);
 
     let uem1 = UnfilledEnumMess::try_from(u18::new(0b1_0101_1110_0_1010_1010)).unwrap();
     let uem2 = UnfilledEnumMess::new([[
-        ([[(HaveFun::Maybe, u2::new(2)), (HaveFun::Maybe, u2::new(2))]], u1::new(0)),
-        ([[(HaveFun::Maybe, u2::new(3)), (HaveFun::No, u2::new(1))]], u1::new(1)),
+        (
+            [[(HaveFun::Maybe, u2::new(2)), (HaveFun::Maybe, u2::new(2))]],
+            u1::new(0),
+        ),
+        (
+            [[(HaveFun::Maybe, u2::new(3)), (HaveFun::No, u2::new(1))]],
+            u1::new(1),
+        ),
     ]]);
     assert_eq!(uem1.value, uem2.value);
     assert_eq!(uem1, uem2);
@@ -463,10 +526,16 @@ struct ArrayTupleDefault {
 #[test]
 fn default_bits() {
     let default = NestedNonZeroDefault::default();
-    assert_eq!(default, NestedNonZeroDefault::new(u2::new(0), u4::new(0), Cool::CooooolDefault));
+    assert_eq!(
+        default,
+        NestedNonZeroDefault::new(u2::new(0), u4::new(0), Cool::CooooolDefault)
+    );
 
     let default = ArrayTupleDefault::default();
-    assert_eq!(default, ArrayTupleDefault::from(u34::new(0b1000_1000_1000_10_10_1000_01000_1000_01000)));
+    assert_eq!(
+        default,
+        ArrayTupleDefault::from(u34::new(0b1000_1000_1000_10_10_1000_01000_1000_01000))
+    );
 }
 
 // quick 'n dirty -- consider something more robust if more manual implementations are needed

@@ -14,7 +14,8 @@ pub(crate) fn handmade(input: (u32, u32, u64, u16)) {
 
     assert!(lpi.control.clear_enable_supported());
     assert_eq!(lpi.implementer_identification.implementer_jep106(), 2054);
-    lpi.implementer_identification.set_implementer_jep106(input.3);
+    lpi.implementer_identification
+        .set_implementer_jep106(input.3);
     assert_eq!(lpi.implementer_identification.implementer_jep106(), input.3);
     assert_eq!(lpi.redistributor_type.processor_number(), 63872);
 }

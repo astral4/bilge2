@@ -1,4 +1,12 @@
-#![cfg_attr(feature = "nightly", feature(const_convert, const_trait_impl, const_mut_refs, const_maybe_uninit_write))]
+#![cfg_attr(
+    feature = "nightly",
+    feature(
+        const_convert,
+        const_trait_impl,
+        const_mut_refs,
+        const_maybe_uninit_write
+    )
+)]
 #![allow(clippy::unusual_byte_groupings)]
 use bilge::prelude::*;
 
@@ -67,7 +75,11 @@ enum Subclass2 {
 }
 
 fn main() {
-    let reg1 = Register::new(u4::new(0b1010), u7::new(0b010_1010), Footer::new(true, Code::GoodExample));
+    let reg1 = Register::new(
+        u4::new(0b1010),
+        u7::new(0b010_1010),
+        Footer::new(true, Code::GoodExample),
+    );
     let mut reg2 = Register::from(u14::new(0b11_1_0101010_1010));
     assert_eq!(reg1.value, reg2.value);
     let _header = reg2.header();

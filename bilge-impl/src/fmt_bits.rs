@@ -2,7 +2,9 @@ use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 use syn::{punctuated::Iter, Data, DeriveInput, Fields, Variant};
 
-use crate::shared::{self, discriminant_assigner::DiscriminantAssigner, fallback::Fallback, unreachable, BitSize};
+use crate::shared::{
+    self, discriminant_assigner::DiscriminantAssigner, fallback::Fallback, unreachable, BitSize,
+};
 
 pub(crate) fn binary(item: TokenStream) -> TokenStream {
     let derive_input = parse(item);
@@ -10,7 +12,9 @@ pub(crate) fn binary(item: TokenStream) -> TokenStream {
 
     match derive_data {
         Data::Struct(data) => generate_struct_binary_impl(name, &data.fields),
-        Data::Enum(data) => generate_enum_binary_impl(name, data.variants.iter(), arb_int, bitsize, fallback),
+        Data::Enum(data) => {
+            generate_enum_binary_impl(name, data.variants.iter(), arb_int, bitsize, fallback)
+        }
         _ => unreachable(()),
     }
 }
@@ -51,9 +55,14 @@ fn generate_struct_binary_impl(struct_name: &Ident, fields: &Fields) -> TokenStr
 }
 
 fn generate_enum_binary_impl(
-    enum_name: &Ident, variants: Iter<Variant>, arb_int: TokenStream, bitsize: BitSize, fallback: Option<Fallback>,
+    enum_name: &Ident,
+    variants: Iter<Variant>,
+    arb_int: TokenStream,
+    bitsize: BitSize,
+    fallback: Option<Fallback>,
 ) -> TokenStream {
-    let to_int_match_arms = generate_to_int_match_arms(variants, enum_name, bitsize, arb_int, fallback);
+    let to_int_match_arms =
+        generate_to_int_match_arms(variants, enum_name, bitsize, arb_int, fallback);
 
     let body = if to_int_match_arms.is_empty() {
         quote! { Ok(()) }
@@ -77,7 +86,11 @@ fn generate_enum_binary_impl(
 
 /// generates the arms for an (infallible) conversion from an enum to the enum's underlying arbitrary_int
 fn generate_to_int_match_arms(
-    variants: Iter<Variant>, enum_name: &Ident, bitsize: BitSize, arb_int: TokenStream, fallback: Option<Fallback>,
+    variants: Iter<Variant>,
+    enum_name: &Ident,
+    bitsize: BitSize,
+    arb_int: TokenStream,
+    fallback: Option<Fallback>,
 ) -> Vec<TokenStream> {
     let is_value_fallback = |variant_name| {
         if let Some(Fallback::WithValue(name)) = &fallback {

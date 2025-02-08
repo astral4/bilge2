@@ -32,7 +32,8 @@ pub(super) fn debug_bits(item: TokenStream) -> TokenStream {
         }
         Fields::Unnamed(fields) => {
             let calls = fields.unnamed.iter().map(|_| {
-                let call: Ident = syn::parse_str(&format!("val_{}", fieldless_next_int)).unwrap_or_else(unreachable);
+                let call: Ident = syn::parse_str(&format!("val_{}", fieldless_next_int))
+                    .unwrap_or_else(unreachable);
                 fieldless_next_int += 1;
                 quote!(.field(&self.#call()))
             });

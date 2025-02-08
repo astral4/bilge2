@@ -5,7 +5,9 @@ use core::fmt;
 
 #[doc(no_inline)]
 pub use arbitrary_int;
-pub use bilge_impl::{bitsize, bitsize_internal, BinaryBits, DebugBits, DefaultBits, FromBits, TryFromBits};
+pub use bilge_impl::{
+    bitsize, bitsize_internal, BinaryBits, DebugBits, DefaultBits, FromBits, TryFromBits,
+};
 #[cfg(feature = "serde")]
 pub use bilge_impl::{DeserializeBits, SerializeBits};
 

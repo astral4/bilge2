@@ -16,16 +16,22 @@ pub(crate) fn modular(input: (u32, u32, u64, u16)) {
 
     let mut lpi = GicRedistributorLpi {
         control: RedistributorControl::from_bytes(control),
-        implementer_identification: RedistributorImplementerIdentification::from_bytes(implementer_identification),
+        implementer_identification: RedistributorImplementerIdentification::from_bytes(
+            implementer_identification,
+        ),
         redistributor_type: RedistributorType::from_bytes(redistributor_type),
     };
     assert_eq!(u32::from_le_bytes(lpi.control.bytes), input.0);
-    assert_eq!(u32::from_le_bytes(lpi.implementer_identification.bytes), input.1);
+    assert_eq!(
+        u32::from_le_bytes(lpi.implementer_identification.bytes),
+        input.1
+    );
     assert_eq!(u64::from_le_bytes(lpi.redistributor_type.bytes), input.2);
 
     assert!(lpi.control.clear_enable_supported());
     assert_eq!(lpi.implementer_identification.implementer_jep106(), 2054); //B12?
-    lpi.implementer_identification.set_implementer_jep106(B12::from_bytes(input.3).unwrap()); //`from_bytes` does not always get bytes..
+    lpi.implementer_identification
+        .set_implementer_jep106(B12::from_bytes(input.3).unwrap()); //`from_bytes` does not always get bytes..
     assert_eq!(lpi.implementer_identification.implementer_jep106(), input.3); //B12?
     assert_eq!(lpi.redistributor_type.processor_number(), 63872);
 }

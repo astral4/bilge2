@@ -3,7 +3,10 @@ use proc_macro_error::{abort, emit_call_site_warning};
 use quote::quote;
 use syn::{punctuated::Iter, Data, DeriveInput, Fields, Type, Variant};
 
-use crate::shared::{self, discriminant_assigner::DiscriminantAssigner, enum_fills_bitsize, fallback::Fallback, unreachable, BitSize};
+use crate::shared::{
+    self, discriminant_assigner::DiscriminantAssigner, enum_fills_bitsize, fallback::Fallback,
+    unreachable, BitSize,
+};
 use crate::shared::{bitsize_from_type_ident, last_ident_of_path};
 
 pub(super) fn try_from_bits(item: TokenStream) -> TokenStream {
@@ -24,11 +27,18 @@ fn parse(item: TokenStream) -> DeriveInput {
     shared::parse_derive(item)
 }
 
-fn analyze(derive_input: &DeriveInput) -> (&syn::Data, TokenStream, &Ident, BitSize, Option<Fallback>) {
+fn analyze(
+    derive_input: &DeriveInput,
+) -> (&syn::Data, TokenStream, &Ident, BitSize, Option<Fallback>) {
     shared::analyze_derive(derive_input, true)
 }
 
-fn analyze_enum(variants: Iter<Variant>, name: &Ident, internal_bitsize: BitSize, arb_int: &TokenStream) -> (Vec<TokenStream>, Vec<TokenStream>) {
+fn analyze_enum(
+    variants: Iter<Variant>,
+    name: &Ident,
+    internal_bitsize: BitSize,
+    arb_int: &TokenStream,
+) -> (Vec<TokenStream>, Vec<TokenStream>) {
     validate_enum_variants(variants.clone());
 
     if enum_fills_bitsize(internal_bitsize, variants.len()) {
@@ -46,19 +56,29 @@ fn analyze_enum(variants: Iter<Variant>, name: &Ident, internal_bitsize: BitSize
                 #variant_value => Ok(Self::#variant_name),
             };
 
-            let to_int_match_arm = shared::to_int_match_arm(name, variant_name, arb_int, variant_value);
+            let to_int_match_arm =
+                shared::to_int_match_arm(name, variant_name, arb_int, variant_value);
 
             (from_int_match_arm, to_int_match_arm)
         })
         .unzip()
 }
 
-fn codegen_enum(arb_int: TokenStream, enum_type: &Ident, match_arms: (Vec<TokenStream>, Vec<TokenStream>)) -> TokenStream {
+fn codegen_enum(
+    arb_int: TokenStream,
+    enum_type: &Ident,
+    match_arms: (Vec<TokenStream>, Vec<TokenStream>),
+) -> TokenStream {
     let (from_int_match_arms, to_int_match_arms) = match_arms;
 
-    let const_ = if cfg!(feature = "nightly") { quote!(const) } else { quote!() };
+    let const_ = if cfg!(feature = "nightly") {
+        quote!(const)
+    } else {
+        quote!()
+    };
 
-    let from_enum_impl = shared::generate_from_enum_impl(&arb_int, enum_type, to_int_match_arms, &const_);
+    let from_enum_impl =
+        shared::generate_from_enum_impl(&arb_int, enum_type, to_int_match_arms, &const_);
     quote! {
         impl #const_ ::core::convert::TryFrom<#arb_int> for #enum_type {
             type Error = ::bilge::BitsError;
@@ -102,7 +122,11 @@ fn codegen_struct(arb_int: TokenStream, struct_type: &Ident, fields: &Fields) ->
         // `Struct {}` would be handled like this:
         .unwrap_or_else(|| quote!(true));
 
-    let const_ = if cfg!(feature = "nightly") { quote!(const) } else { quote!() };
+    let const_ = if cfg!(feature = "nightly") {
+        quote!(const)
+    } else {
+        quote!()
+    };
 
     quote! {
         impl #const_ ::core::convert::TryFrom<#arb_int> for #struct_type {

@@ -23,13 +23,21 @@ pub(super) fn serialize_bits(item: TokenStream) -> TokenStream {
 
     let serialize_impl = match struct_data.fields {
         Fields::Named(fields) => {
-            let calls = fields.named.iter().filter(filter_not_reserved_or_padding).map(|f| {
-                // We can unwrap since this is a named field
-                let call = f.ident.as_ref().unwrap();
-                let name = call.to_string();
-                quote!(state.serialize_field(#name, &self.#call())?;)
-            });
-            let len = fields.named.iter().filter(filter_not_reserved_or_padding).count();
+            let calls = fields
+                .named
+                .iter()
+                .filter(filter_not_reserved_or_padding)
+                .map(|f| {
+                    // We can unwrap since this is a named field
+                    let call = f.ident.as_ref().unwrap();
+                    let name = call.to_string();
+                    quote!(state.serialize_field(#name, &self.#call())?;)
+                });
+            let len = fields
+                .named
+                .iter()
+                .filter(filter_not_reserved_or_padding)
+                .count();
             quote! {
                 use ::serde::ser::SerializeStruct;
                 let mut state = serializer.serialize_struct(#name_str, #len)?;
@@ -68,7 +76,8 @@ pub(super) fn serialize_bits(item: TokenStream) -> TokenStream {
 }
 
 fn deserialize_field_parts(
-    i: usize, field_ident: &Ident,
+    i: usize,
+    field_ident: &Ident,
 ) -> (
     TokenStream,
     TokenStream,
@@ -119,20 +128,34 @@ pub(super) fn deserialize_bits(item: TokenStream) -> TokenStream {
         field_visit_map_match,
         field_visit_map_check,
         mut field_expecting,
-    ): (Vec<_>, Vec<_>, Vec<_>, Vec<_>, Vec<_>, Vec<_>, Vec<_>, Vec<_>) = match struct_data.fields {
+    ): (
+        Vec<_>,
+        Vec<_>,
+        Vec<_>,
+        Vec<_>,
+        Vec<_>,
+        Vec<_>,
+        Vec<_>,
+        Vec<_>,
+    ) = match struct_data.fields {
         Fields::Named(fields) => fields
-                .named
-                .iter()
-                .filter(filter_not_reserved_or_padding)
-                .enumerate()
-                .map(|(i, f)| deserialize_field_parts(i, f.ident.as_ref().unwrap()))
-                .multiunzip(),
+            .named
+            .iter()
+            .filter(filter_not_reserved_or_padding)
+            .enumerate()
+            .map(|(i, f)| deserialize_field_parts(i, f.ident.as_ref().unwrap()))
+            .multiunzip(),
         Fields::Unnamed(fields) => fields
-                .unnamed
-                .iter()
-                .enumerate()
-                .map(|(i, _)| deserialize_field_parts(i, &syn::parse_str(&format!("val_{}", i)).unwrap_or_else(unreachable)))
-                .multiunzip(),
+            .unnamed
+            .iter()
+            .enumerate()
+            .map(|(i, _)| {
+                deserialize_field_parts(
+                    i,
+                    &syn::parse_str(&format!("val_{}", i)).unwrap_or_else(unreachable),
+                )
+            })
+            .multiunzip(),
         Fields::Unit => todo!("this is a unit struct, which is not supported right now"),
     };
 
@@ -143,18 +166,18 @@ pub(super) fn deserialize_bits(item: TokenStream) -> TokenStream {
 
     let visit_map = if should_have_visit_map {
         quote!(fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
-            where
-                V: ::serde::de::MapAccess<'de>,
-            {
-                #(#field_visit_map_init)*
-                while let Some(key) = map.next_key()? {
-                    match key {
-                        #(#field_visit_map_match)*
-                    }
+        where
+            V: ::serde::de::MapAccess<'de>,
+        {
+            #(#field_visit_map_init)*
+            while let Some(key) = map.next_key()? {
+                match key {
+                    #(#field_visit_map_match)*
                 }
-                #(#field_visit_map_check)*
-                Ok(#name::new(#(#field_names)*))
-            })
+            }
+            #(#field_visit_map_check)*
+            Ok(#name::new(#(#field_names)*))
+        })
     } else {
         quote!()
     };

@@ -1,4 +1,7 @@
-#![cfg_attr(feature = "nightly", feature(const_convert, const_trait_impl, const_mut_refs))]
+#![cfg_attr(
+    feature = "nightly",
+    feature(const_convert, const_trait_impl, const_mut_refs)
+)]
 use bilge::prelude::*;
 
 //it is still a little annoying that rust gives us the helpful message to implement "Debug" instead of "DebugBits"
@@ -61,7 +64,11 @@ fn main() {
     println!();
     println!();
     println!();
-    let mut a = ParentStruct::new(ChildStruct::new(NestedChildEnum::A), ChildEnum::D, u2::new(0b00));
+    let mut a = ParentStruct::new(
+        ChildStruct::new(NestedChildEnum::A),
+        ChildEnum::D,
+        u2::new(0b00),
+    );
     println!("{a:?}");
     println!("{:?}", a.field1());
     println!("{:?}", a.field2());

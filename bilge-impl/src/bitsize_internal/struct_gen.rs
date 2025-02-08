@@ -28,7 +28,11 @@ use super::*;
 /// Top-level function which initializes the cursor and offsets it to what we want to read
 ///
 /// `is_array_elem_getter` allows us to generate an array_at getter more easily
-pub(crate) fn generate_getter_value(ty: &Type, offset: &TokenStream, is_array_elem_getter: bool) -> TokenStream {
+pub(crate) fn generate_getter_value(
+    ty: &Type,
+    offset: &TokenStream,
+    is_array_elem_getter: bool,
+) -> TokenStream {
     // if we generate `fn array_at(index)`, we need to offset to the array element
     let elem_offset = if is_array_elem_getter {
         let size = shared::generate_type_bitsize(ty);
@@ -198,7 +202,11 @@ pub(crate) fn generate_getter_inner(ty: &Type, is_getter: bool) -> TokenStream {
 /// Top-level function which initializes the offset, masks other values and combines the final value
 ///
 /// `is_array_elem_setter` allows us to generate a set_array_at setter more easily
-pub(crate) fn generate_setter_value(ty: &Type, offset: &TokenStream, is_array_elem_setter: bool) -> TokenStream {
+pub(crate) fn generate_setter_value(
+    ty: &Type,
+    offset: &TokenStream,
+    is_array_elem_setter: bool,
+) -> TokenStream {
     // if we generate `fn set_array_at(index, value)`, we need to offset to the array element
     let elem_offset = if is_array_elem_setter {
         let size = shared::generate_type_bitsize(ty);
@@ -346,7 +354,10 @@ fn generate_ty_mask(ty: &Type) -> TokenStream {
                     // get it's size
                     let elem_size = shared::generate_type_bitsize(elem);
                     // generate it's offset from all previous sizes
-                    let elem_offset = previous_elem_sizes.iter().cloned().reduce(|acc, next| quote!((#acc + #next)));
+                    let elem_offset = previous_elem_sizes
+                        .iter()
+                        .cloned()
+                        .reduce(|acc, next| quote!((#acc + #next)));
                     previous_elem_sizes.push(elem_size);
                     // the first field doesn't need to be shifted
                     if let Some(elem_offset) = elem_offset {

@@ -1,4 +1,12 @@
-#![cfg_attr(feature = "nightly", feature(const_convert, const_trait_impl, const_mut_refs, const_maybe_uninit_write))]
+#![cfg_attr(
+    feature = "nightly",
+    feature(
+        const_convert,
+        const_trait_impl,
+        const_mut_refs,
+        const_maybe_uninit_write
+    )
+)]
 use bilge::prelude::*;
 use volatile::{access::ReadOnly, VolatilePtr};
 use zerocopy::FromBytes;
@@ -59,7 +67,10 @@ fn main() {
     println!("{:032b}", redist.group.read());
     println!("{:?}", redist.group);
 
-    let mut raw_memory: (RedistributorControl, Group) = (0b00000011000000100000000100000000u32.into(), 0b11111111111111101111111111111111u32.into());
+    let mut raw_memory: (RedistributorControl, Group) = (
+        0b00000011000000100000000100000000u32.into(),
+        0b11111111111111101111111111111111u32.into(),
+    );
 
     let redist = Redistributor {
         control: unsafe { VolatilePtr::new((&mut raw_memory.0).into()) },

@@ -5,7 +5,9 @@ use bitbybit::bitfield;
 pub(crate) fn bitbybit(input: (u32, u32, u64, u16)) {
     let mut lpi = GicRedistributorLpi {
         control: RedistributorControl::new_with_raw_value(input.0),
-        implementer_identification: RedistributorImplementerIdentification::new_with_raw_value(input.1),
+        implementer_identification: RedistributorImplementerIdentification::new_with_raw_value(
+            input.1,
+        ),
         redistributor_type: RedistributorType::new_with_raw_value(input.2),
     };
     assert_eq!(lpi.control.raw_value, input.0);
@@ -13,9 +15,17 @@ pub(crate) fn bitbybit(input: (u32, u32, u64, u16)) {
     assert_eq!(lpi.redistributor_type.raw_value, input.2);
 
     assert!(lpi.control.clear_enable_supported());
-    assert_eq!(lpi.implementer_identification.implementer_jep106(), u12::new(2054));
-    lpi.implementer_identification = lpi.implementer_identification.with_implementer_jep106(u12::new(input.3));
-    assert_eq!(lpi.implementer_identification.implementer_jep106(), u12::new(input.3));
+    assert_eq!(
+        lpi.implementer_identification.implementer_jep106(),
+        u12::new(2054)
+    );
+    lpi.implementer_identification = lpi
+        .implementer_identification
+        .with_implementer_jep106(u12::new(input.3));
+    assert_eq!(
+        lpi.implementer_identification.implementer_jep106(),
+        u12::new(input.3)
+    );
     assert_eq!(lpi.redistributor_type.processor_number(), 63872);
 }
 
